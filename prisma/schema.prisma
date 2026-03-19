@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  created_at DateTime @default(now())
+  routes     Route[]
+
+  @@map("users")
+}
+
+model Location {
+  id          String                                @id @default(uuid())
+  name        String
+  // PostGIS geometry type must be explicit in Prisma 
+  coordinates Unsupported("geometry(Point, 4326)")?
+
+  @@map("locations")
+}
+
+model Route {
+  id                String         @id @default(uuid())
+  creator_id        String
+  creator           User           @relation(fields: [creator_id], references: [id])
+  start_name        String
+  start_coordinates Unsupported("geometry(Point, 4326)")?
+  end_name          String
+  end_coordinates   Unsupported("geometry(Point, 4326)")?
+  total_cost        Decimal        @db.Decimal(10, 2)
+  total_time_mins   Int
+  upvotes           Int            @default(0)
+  downvotes         Int            @default(0)
+  created_at        DateTime       @default(now())
+  segments          RouteSegment[]
+
+  @@map("routes")
+}
+
+model RouteSegment {
+  id                  String  @id @default(uuid())
+  route_id            String
+  route               Route   @relation(fields: [route_id], references: [id], onDelete: Cascade)
+  step_order          Int
+  start_location_name String
+  end_location_name   String
+  transport_mode      String  // Enum-like: keke, taxi, bus, walk
+  cost                Decimal @db.Decimal(10, 2)
+  instructions        String? @db.Text
+
+  @@map("route_segments")
+}
