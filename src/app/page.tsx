@@ -25,13 +25,12 @@ export default function Home() {
     setHasSearched(true);
     
     try {
-      // Mock coordinates for the MVP since we don't have a geocoding API set up yet
-      const startLat = 9.05785;
-      const startLng = 7.49508;
-      const endLat = 9.07647;
-      const endLng = 7.47321;
+      const queryParams = new URLSearchParams({
+        start_name: start,
+        end_name: destination,
+      });
       
-      const res = await fetch(`/api/routes/search?start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}&fallback=true`);
+      const res = await fetch(`/api/routes/search?${queryParams.toString()}`);
       const data = await res.json();
       
       if (data.routes) {
