@@ -13,7 +13,8 @@ export async function POST(request: Request) {
       end_name,
       end_lat,
       end_lng,
-      segments
+      segments,
+      authorName
     } = body;
 
     if (!start_name || !end_name || !segments || segments.length === 0) {
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
         end_name,
         total_cost: total_cost,
         total_time_mins: segments.length * 15, // Mock time or calculate it
+        authorName: authorName || null,
         segments: {
           create: segments.map((seg: any, index: number) => ({
             step_order: index + 1,

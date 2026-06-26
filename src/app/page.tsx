@@ -47,13 +47,13 @@ export default function Home() {
     <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
       
       {/* Map Background Layer */}
-      <div className={`absolute inset-0 z-0 transition-all duration-500 ${hasSearched ? 'h-[40%]' : 'h-[60%]'} md:h-screen md:w-full`}>
+      <div className="absolute inset-0 z-0 w-full h-full transition-all duration-500">
         <MapViewer center={[9.05785, 7.49508]} zoom={12} markers={markers} />
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-50 to-transparent z-[400] pointer-events-none" />
       </div>
 
       {/* Floating Action / Search Floating Box */}
-      <div className={`relative z-[500] mt-auto w-full bg-slate-50 rounded-t-3xl pt-6 pb-6 px-5 flex flex-col gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] transition-all duration-500 ${hasSearched ? 'h-[65%] overflow-y-auto' : ''} md:absolute md:top-4 md:left-4 md:bottom-4 md:w-96 md:rounded-2xl md:h-auto md:mt-0`}>
+      <div className={`relative z-[500] mt-auto w-full bg-slate-50 rounded-t-3xl pt-6 pb-6 px-5 flex flex-col gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] transition-all duration-500 overflow-y-auto ${hasSearched ? 'h-[65%]' : ''} md:absolute md:top-4 md:left-4 md:bottom-4 md:w-[400px] md:h-auto md:max-h-[calc(100vh-2rem)] md:rounded-2xl md:mt-0`}>
         
         <div className="flex flex-col items-center justify-center mb-2 shrink-0">
           <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
@@ -144,6 +144,9 @@ export default function Home() {
                     </div>
                     <p className="text-slate-500 text-sm flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" /> Est. {route.total_time_mins} mins
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1">
+                      Submitted by <span className="font-medium text-slate-500">{route.authorName || "Anonymous Commuter"}</span>
                     </p>
                   </div>
                   <div className="flex flex-col items-end">

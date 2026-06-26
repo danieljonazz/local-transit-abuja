@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 export default function SubmitRoute() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [authorName, setAuthorName] = useState("");
   const [segments, setSegments] = useState([
     { transport_mode: "keke", start_location: "", end_location: "", cost: "" }
   ]);
@@ -44,7 +45,8 @@ export default function SubmitRoute() {
           end_name: segments[segments.length - 1].end_location,
           end_lat: 9.07647,
           end_lng: 7.47321,
-          segments: segments
+          segments: segments,
+          authorName: authorName
         })
       });
 
@@ -168,6 +170,18 @@ export default function SubmitRoute() {
           >
             <Plus className="w-4 h-4" /> Add Next Step
           </button>
+        </div>
+
+        {/* Author Name */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
+          <h3 className="font-semibold text-slate-700 text-sm">Author (Optional)</h3>
+          <input 
+            type="text" 
+            placeholder="Optional: Your Name or Twitter Handle (@name)" 
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-green-500/20 outline-none w-full"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+          />
         </div>
 
         <button 

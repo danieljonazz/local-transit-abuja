@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-50 text-slate-900 mx-auto max-w-lg min-h-screen border-x shadow-sm`}>
+      <body className={`${inter.className} bg-slate-50 text-slate-900 w-full h-[100dvh] overflow-hidden`}>
         <header className="sticky top-0 z-50 bg-white border-b px-4 py-3 shadow-sm flex items-center justify-between">
           <h1 className="font-bold text-xl text-green-700">Transit<span className="text-slate-800">Abuja</span></h1>
           <button className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200">

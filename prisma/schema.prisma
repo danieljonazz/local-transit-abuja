@@ -36,6 +36,7 @@ model Route {
   end_coordinates   Unsupported("geometry(Point, 4326)")?
   total_cost        Decimal        @db.Decimal(10, 2)
   total_time_mins   Int
+  authorName        String?
   upvotes           Int            @default(0)
   downvotes         Int            @default(0)
   created_at        DateTime       @default(now())
