@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { 
-      start_name, 
-      start_lat, 
-      start_lng, 
-      end_name, 
-      end_lat, 
-      end_lng, 
-      segments 
+    const {
+      start_name,
+      start_lat,
+      start_lng,
+      end_name,
+      end_lat,
+      end_lng,
+      segments
     } = body;
 
     if (!start_name || !end_name || !segments || segments.length === 0) {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Calculate total cost
-    interface Segment { cost: string | number; [key: string]: any }
+    interface Segment { cost: string | number;[key: string]: any }
     const total_cost = segments.reduce((acc: number, seg: Segment) => acc + Number(seg.cost), 0);
 
     // Create the route within a transaction or create sequence
