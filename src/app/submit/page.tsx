@@ -66,14 +66,14 @@ export default function SubmitRoute() {
   return (
     <div className="bg-slate-50 min-h-full flex flex-col pt-4 overflow-y-auto pb-20">
       
-      <div className="px-5 mb-6 flex items-center">
+      <div className="px-5 mb-6 flex items-center md:max-w-2xl md:mx-auto md:w-full md:mt-8">
         <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-slate-200 text-slate-600 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h2 className="text-xl font-bold ml-2 text-slate-800">Add a New Route</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-5 flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="px-5 flex flex-col gap-6 md:max-w-2xl md:mx-auto md:w-full">
         
         {/* Overall Journey */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
@@ -82,7 +82,7 @@ export default function SubmitRoute() {
             Overall Journey
           </h3>
           
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 md:grid md:grid-cols-2">
             <input 
               required
               type="text" 
@@ -139,7 +139,7 @@ export default function SubmitRoute() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-2">
                 <input 
                   required
                   type="text" 
