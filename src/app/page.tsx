@@ -170,6 +170,13 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                
+                {route.description && (
+                  <p className="text-sm italic text-slate-600 bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+                    <span className="font-semibold text-amber-700 not-italic block mb-1">💡 Pro-Tip</span>
+                    {route.description}
+                  </p>
+                )}
               </div>
             ))}
           </div>

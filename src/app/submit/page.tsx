@@ -9,6 +9,7 @@ export default function SubmitRoute() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [authorName, setAuthorName] = useState("");
+  const [description, setDescription] = useState("");
   const [segments, setSegments] = useState([
     { transport_mode: "keke", start_location: "", end_location: "", cost: "" }
   ]);
@@ -46,7 +47,8 @@ export default function SubmitRoute() {
           end_lat: 9.07647,
           end_lng: 7.47321,
           segments: segments,
-          authorName: authorName
+          authorName: authorName,
+          description: description
         })
       });
 
@@ -170,6 +172,17 @@ export default function SubmitRoute() {
           >
             <Plus className="w-4 h-4" /> Add Next Step
           </button>
+        </div>
+
+        {/* Pro-Tips / Description */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
+          <h3 className="font-semibold text-slate-700 text-sm">Description / Pro-Tips (Optional)</h3>
+          <textarea 
+            placeholder="Add pro-tips (e.g., 'Stand under the bridge, heavy traffic around 5 PM')"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-green-500/20 outline-none w-full min-h-[80px] resize-y"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
 
         {/* Author Name */}

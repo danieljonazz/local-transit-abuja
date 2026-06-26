@@ -37,6 +37,7 @@ model Route {
   total_cost        Decimal        @db.Decimal(10, 2)
   total_time_mins   Int
   authorName        String?
+  description       String?        @db.Text
   upvotes           Int            @default(0)
   downvotes         Int            @default(0)
   created_at        DateTime       @default(now())
