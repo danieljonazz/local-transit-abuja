@@ -73,7 +73,7 @@ export default function Home() {
             <input 
               type="text" 
               placeholder="Where are you? (e.g., Gwarinpa)" 
-              className="flex-1 bg-transparent border-none outline-none text-[15px] placeholder:text-slate-400 py-1"
+              className="flex-1 bg-transparent border-none outline-none text-[15px] text-slate-900 placeholder:text-slate-600 py-1"
               value={start}
               onChange={(e) => setStart(e.target.value)}
             />
@@ -87,7 +87,7 @@ export default function Home() {
             <input 
               type="text" 
               placeholder="Where to? (e.g., Wuse Market)" 
-              className="flex-1 bg-transparent border-none outline-none text-[15px] placeholder:text-slate-400 py-1"
+              className="flex-1 bg-transparent border-none outline-none text-[15px] text-slate-900 placeholder:text-slate-600 py-1"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
             />
@@ -95,7 +95,7 @@ export default function Home() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-2 shrink-0">
+        <div className="flex gap-3 mt-4 mb-2 shrink-0">
           <button 
             onClick={handleSearch}
             disabled={loading}

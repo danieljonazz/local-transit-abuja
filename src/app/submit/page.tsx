@@ -87,13 +87,13 @@ export default function SubmitRoute() {
               required
               type="text" 
               placeholder="Starting Address / Junction" 
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 ring-green-500/20 outline-none"
+              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-green-500/20 outline-none"
             />
             <input 
               required
               type="text" 
               placeholder="Final Destination" 
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 ring-blue-500/20 outline-none"
+              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-blue-500/20 outline-none"
             />
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function SubmitRoute() {
                     required
                     type="number" 
                     placeholder="Cost" 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-7 pr-3 py-2.5 text-sm outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-7 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 outline-none"
                     value={segment.cost}
                     onChange={(e) => updateSegment(index, "cost", e.target.value)}
                   />
@@ -144,7 +144,7 @@ export default function SubmitRoute() {
                   required
                   type="text" 
                   placeholder={index === 0 ? "Boarding Point" : "Where to board?"} 
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 outline-none"
                   value={segment.start_location}
                   onChange={(e) => updateSegment(index, "start_location", e.target.value)}
                 />
@@ -152,7 +152,7 @@ export default function SubmitRoute() {
                   required
                   type="text" 
                   placeholder="Drop-off Junction" 
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 outline-none"
                   value={segment.end_location}
                   onChange={(e) => updateSegment(index, "end_location", e.target.value)}
                 />
