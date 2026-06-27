@@ -10,6 +10,8 @@ export default function SubmitRoute() {
   const [loading, setLoading] = useState(false);
   const [authorName, setAuthorName] = useState("");
   const [description, setDescription] = useState("");
+  const [overallStart, setOverallStart] = useState("");
+  const [overallEnd, setOverallEnd] = useState("");
   const [segments, setSegments] = useState([
     { transport_mode: "keke", start_location: "", end_location: "", cost: "" }
   ]);
@@ -40,10 +42,10 @@ export default function SubmitRoute() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          start_name: segments[0].start_location,
+          start_name: overallStart,
           start_lat: 9.05785, // Mock coordinate for now 
           start_lng: 7.49508,
-          end_name: segments[segments.length - 1].end_location,
+          end_name: overallEnd,
           end_lat: 9.07647,
           end_lng: 7.47321,
           segments: segments,
@@ -92,12 +94,16 @@ export default function SubmitRoute() {
               type="text" 
               placeholder="Starting Address / Junction" 
               className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-green-500/20 outline-none"
+              value={overallStart}
+              onChange={(e) => setOverallStart(e.target.value)}
             />
             <input 
               required
               type="text" 
               placeholder="Final Destination" 
               className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-600 focus:ring-2 ring-blue-500/20 outline-none"
+              value={overallEnd}
+              onChange={(e) => setOverallEnd(e.target.value)}
             />
           </div>
         </div>
