@@ -2,7 +2,7 @@
 
 import MapViewer from "@/components/MapViewer";
 import { Search, MapPin, ArrowRightSquare, Route, DollarSign, Clock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function Home() {
@@ -11,6 +11,74 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState<any[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [activeInput, setActiveInput] = useState<'start' | 'destination' | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (!activeInput) {
+      setSuggestions([]);
+      setIsDropdownOpen(false);
+      return;
+    }
+
+    const currentVal = activeInput === 'start' ? start : destination;
+    
+    if (currentVal.length < 2) {
+      setSuggestions([]);
+      setIsDropdownOpen(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/locations/search?q=${encodeURIComponent(currentVal)}`);
+        const data = await res.json();
+        if (data.locations && data.locations.length > 0) {
+          setSuggestions(data.locations);
+          setIsDropdownOpen(true);
+        } else {
+          setSuggestions([]);
+          setIsDropdownOpen(false);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [start, destination, activeInput]);
+
+  const handleSelectSuggestion = (location: string) => {
+    if (activeInput === 'start') {
+      setStart(location);
+    } else if (activeInput === 'destination') {
+      setDestination(location);
+    }
+    setSuggestions([]);
+    setIsDropdownOpen(false);
+    setActiveInput(null);
+  };
+  const [upvotedRoutes, setUpvotedRoutes] = useState<Record<string, boolean>>({});
+
+  const handleUpvote = async (routeId: string) => {
+    if (upvotedRoutes[routeId]) return;
+
+    // Optimistically update UI local state
+    setUpvotedRoutes((prev) => ({ ...prev, [routeId]: true }));
+    setRoutes((prevRoutes) => 
+      prevRoutes.map(r => r.id === routeId ? { ...r, upvotes: r.upvotes + 1 } : r)
+    );
+
+    // Fire fetch request in background
+    try {
+      await fetch(`/api/routes/${routeId}/upvote`, {
+        method: 'PATCH',
+      });
+    } catch (error) {
+      console.error("Failed to upvote:", error);
+    }
+  };
 
   // We add markers based on search results
   const markers = routes.length > 0 ? [
@@ -66,7 +134,7 @@ export default function Home() {
           <div className="absolute left-6 top-[28px] bottom-[28px] w-0.5 bg-slate-300 border-dashed border-l-2 border-slate-200" />
 
           {/* Start Input */}
-          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 focus-within:ring-2 ring-green-500/20 transition-all">
+          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 focus-within:ring-2 ring-green-500/20 transition-all relative">
             <div className="w-6 flex justify-center mr-2">
               <div className="w-3 h-3 rounded-full border-2 border-green-500 bg-white z-10" />
             </div>
@@ -75,12 +143,29 @@ export default function Home() {
               placeholder="Where are you? (e.g., Gwarinpa)" 
               className="flex-1 bg-transparent border-none outline-none text-[15px] text-slate-900 placeholder:text-slate-600 py-1"
               value={start}
-              onChange={(e) => setStart(e.target.value)}
+              onChange={(e) => {
+                setStart(e.target.value);
+                setActiveInput('start');
+              }}
+              onFocus={() => setActiveInput('start')}
             />
+            {isDropdownOpen && activeInput === 'start' && suggestions.length > 0 && (
+              <ul className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[600]">
+                {suggestions.map((loc, idx) => (
+                  <li 
+                    key={idx}
+                    onClick={() => handleSelectSuggestion(loc)}
+                    className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-slate-700 text-[15px] border-b border-slate-50 last:border-0"
+                  >
+                    {loc}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* End Input */}
-          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 focus-within:ring-2 ring-blue-500/20 transition-all">
+          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 focus-within:ring-2 ring-blue-500/20 transition-all relative">
             <div className="w-6 flex justify-center mr-2">
               <MapPin className="w-4 h-4 text-blue-500 z-10 bg-slate-50" />
             </div>
@@ -89,8 +174,25 @@ export default function Home() {
               placeholder="Where to? (e.g., Wuse Market)" 
               className="flex-1 bg-transparent border-none outline-none text-[15px] text-slate-900 placeholder:text-slate-600 py-1"
               value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              onChange={(e) => {
+                setDestination(e.target.value);
+                setActiveInput('destination');
+              }}
+              onFocus={() => setActiveInput('destination')}
             />
+            {isDropdownOpen && activeInput === 'destination' && suggestions.length > 0 && (
+              <ul className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[600]">
+                {suggestions.map((loc, idx) => (
+                  <li 
+                    key={idx}
+                    onClick={() => handleSelectSuggestion(loc)}
+                    className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-slate-700 text-[15px] border-b border-slate-50 last:border-0"
+                  >
+                    {loc}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
@@ -150,9 +252,17 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="bg-slate-50 text-slate-600 px-2 py-1 rounded-lg text-xs font-bold border border-slate-200 shadow-sm">
+                    <button 
+                      onClick={() => handleUpvote(route.id)}
+                      disabled={upvotedRoutes[route.id]}
+                      className={`px-2 py-1 rounded-lg text-xs font-bold border shadow-sm transition-colors ${
+                        upvotedRoutes[route.id] 
+                          ? "bg-green-100 text-green-700 border-green-200 cursor-default" 
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 active:bg-slate-200"
+                      }`}
+                    >
                       👍 {route.upvotes}
-                    </span>
+                    </button>
                   </div>
                 </div>
 
