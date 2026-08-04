@@ -1,16 +1,45 @@
 "use client";
 
 import MapViewer from "@/components/MapViewer";
-import { Search, MapPin, ArrowRightSquare, Route, DollarSign, Clock } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Search, MapPin, ArrowRightSquare, Route, DollarSign, Clock, ArrowUpDown, Share2 } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function Home() {
-  const [start, setStart] = useState("");
-  const [destination, setDestination] = useState("");
+  return (
+    <Suspense fallback={<div>Loading search...</div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const urlStart = searchParams.get('start');
+  const urlEnd = searchParams.get('end');
+
+  const [start, setStart] = useState(urlStart || "");
+  const [destination, setDestination] = useState(urlEnd || "");
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState<any[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (urlStart && urlEnd && !hasSearched) {
+      fetchRoutes(urlStart, urlEnd);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlStart, urlEnd]);
+
+  const handleShare = () => {
+    if (!start || !destination) return;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(destination)}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [activeInput, setActiveInput] = useState<'start' | 'destination' | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -59,6 +88,15 @@ export default function Home() {
     setIsDropdownOpen(false);
     setActiveInput(null);
   };
+
+  const handleSwap = () => {
+    setStart(destination);
+    setDestination(start);
+    setSuggestions([]);
+    setIsDropdownOpen(false);
+    setActiveInput(null);
+  };
+
   const [upvotedRoutes, setUpvotedRoutes] = useState<Record<string, boolean>>({});
 
   const handleUpvote = async (routeId: string) => {
@@ -86,16 +124,16 @@ export default function Home() {
     { id: "end", position: [9.07647, 7.47321] as [number, number], title: routes[0].end_name }
   ] : [];
 
-  const handleSearch = async () => {
-    if (!start || !destination) return;
+  const fetchRoutes = async (startName: string, endName: string) => {
+    if (!startName || !endName) return;
     
     setLoading(true);
     setHasSearched(true);
     
     try {
       const queryParams = new URLSearchParams({
-        start_name: start,
-        end_name: destination,
+        start_name: startName,
+        end_name: endName,
       });
       
       const res = await fetch(`/api/routes/search?${queryParams.toString()}`);
@@ -110,6 +148,8 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const handleSearch = () => fetchRoutes(start, destination);
 
   return (
     <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
@@ -132,6 +172,15 @@ export default function Home() {
         <div className="flex flex-col relative gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm shrink-0">
           
           <div className="absolute left-6 top-[28px] bottom-[28px] w-0.5 bg-slate-300 border-dashed border-l-2 border-slate-200" />
+
+          <button 
+            onClick={handleSwap}
+            className="absolute right-6 top-1/2 -translate-y-1/2 bg-white border border-slate-200 shadow-sm p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors z-[550]"
+            title="Swap locations"
+            type="button"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+          </button>
 
           {/* Start Input */}
           <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 focus-within:ring-2 ring-green-500/20 transition-all relative">
@@ -221,10 +270,21 @@ export default function Home() {
         {/* Search Results Area */}
         {hasSearched && (
           <div className="mt-4 flex flex-col gap-4 pb-20">
-            <h3 className="font-semibold text-slate-800 text-lg flex justify-between items-center">
-              Routes Found
-              <span className="text-xs font-normal text-slate-500 bg-slate-200 px-2 py-1 rounded-full">{routes.length} options</span>
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-slate-800 text-lg flex items-center gap-2">
+                Routes Found
+                <span className="text-xs font-normal text-slate-500 bg-slate-200 px-2 py-1 rounded-full">{routes.length} options</span>
+              </h3>
+              {routes.length > 0 && (
+                <button 
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 shadow-sm"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  {copied ? "Copied!" : "Share"}
+                </button>
+              )}
+            </div>
             
             {loading && <div className="text-center text-slate-500 py-8 animate-pulse">Finding best community routes...</div>}
             
