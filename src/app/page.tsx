@@ -18,9 +18,11 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const urlStart = searchParams.get('start');
   const urlEnd = searchParams.get('end');
+  const urlSort = searchParams.get('sort');
 
   const [start, setStart] = useState(urlStart || "");
   const [destination, setDestination] = useState(urlEnd || "");
+  const [sortBy, setSortBy] = useState(urlSort === 'cheapest' ? 'cheapest' : 'upvotes');
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState<any[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -28,17 +30,25 @@ function HomeContent() {
 
   useEffect(() => {
     if (urlStart && urlEnd && !hasSearched) {
-      fetchRoutes(urlStart, urlEnd);
+      fetchRoutes(urlStart, urlEnd, sortBy);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlStart, urlEnd]);
 
   const handleShare = () => {
     if (!start || !destination) return;
-    const shareUrl = `${window.location.origin}${window.location.pathname}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(destination)}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(destination)}&sort=${sortBy}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSort = e.target.value;
+    setSortBy(newSort);
+    if (hasSearched) {
+      fetchRoutes(start, destination, newSort);
+    }
   };
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [activeInput, setActiveInput] = useState<'start' | 'destination' | null>(null);
@@ -118,13 +128,11 @@ function HomeContent() {
     }
   };
 
-  // We add markers based on search results
-  const markers = routes.length > 0 ? [
-    { id: "start", position: [9.05785, 7.49508] as [number, number], title: routes[0].start_name },
-    { id: "end", position: [9.07647, 7.47321] as [number, number], title: routes[0].end_name }
-  ] : [];
+  // Extract coordinates from the first matched route, if any
+  const startCoords = routes.length > 0 && routes[0].start_coordinates ? (routes[0].start_coordinates as [number, number]) : null;
+  const endCoords = routes.length > 0 && routes[0].end_coordinates ? (routes[0].end_coordinates as [number, number]) : null;
 
-  const fetchRoutes = async (startName: string, endName: string) => {
+  const fetchRoutes = async (startName: string, endName: string, sortMode: string = 'upvotes') => {
     if (!startName || !endName) return;
     
     setLoading(true);
@@ -134,6 +142,7 @@ function HomeContent() {
       const queryParams = new URLSearchParams({
         start_name: startName,
         end_name: endName,
+        sort: sortMode
       });
       
       const res = await fetch(`/api/routes/search?${queryParams.toString()}`);
@@ -149,23 +158,23 @@ function HomeContent() {
     }
   };
 
-  const handleSearch = () => fetchRoutes(start, destination);
+  const handleSearch = () => fetchRoutes(start, destination, sortBy);
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-y-auto">
       
-      {/* Map Background Layer */}
+      {/* Map Background Layer - Hidden for Version 1
       <div className="absolute inset-0 z-0 w-full h-full transition-all duration-500">
-        <MapViewer center={[9.05785, 7.49508]} zoom={12} markers={markers} />
+        <MapViewer center={[9.05785, 7.49508]} zoom={12} startCoords={startCoords} endCoords={endCoords} />
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-50 to-transparent z-[400] pointer-events-none" />
       </div>
+      */}
 
-      {/* Floating Action / Search Floating Box */}
-      <div className={`relative z-[500] mt-auto w-full bg-slate-50 rounded-t-3xl pt-6 pb-6 px-5 flex flex-col gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] transition-all duration-500 overflow-y-auto ${hasSearched ? 'h-[65%]' : ''} md:absolute md:top-4 md:left-4 md:bottom-4 md:w-[400px] md:h-auto md:max-h-[calc(100vh-2rem)] md:rounded-2xl md:mt-0`}>
+      {/* Main Centered Layout */}
+      <div className="max-w-3xl mx-auto w-full pt-12 pb-20 px-5 flex flex-col gap-6">
         
-        <div className="flex flex-col items-center justify-center mb-2 shrink-0">
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
-          {!hasSearched && <h2 className="text-lg font-semibold self-start text-slate-800">Find Your Route</h2>}
+        <div className="flex flex-col items-center justify-center mb-4 shrink-0">
+          <h2 className="text-2xl font-bold text-slate-800">Find Your Route</h2>
         </div>
 
         {/* Input Fields */}
@@ -275,15 +284,28 @@ function HomeContent() {
                 Routes Found
                 <span className="text-xs font-normal text-slate-500 bg-slate-200 px-2 py-1 rounded-full">{routes.length} options</span>
               </h3>
-              {routes.length > 0 && (
-                <button 
-                  onClick={handleShare}
-                  className="flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 shadow-sm"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  {copied ? "Copied!" : "Share"}
-                </button>
-              )}
+              
+              <div className="flex items-center gap-2">
+                {routes.length > 0 && (
+                  <select 
+                    value={sortBy} 
+                    onChange={handleSortChange}
+                    className="text-sm bg-white border border-slate-200 text-slate-600 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-500/20 shadow-sm cursor-pointer"
+                  >
+                    <option value="upvotes">Top Rated</option>
+                    <option value="cheapest">Cheapest</option>
+                  </select>
+                )}
+                {routes.length > 0 && (
+                  <button 
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 shadow-sm"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    {copied ? "Copied!" : "Share"}
+                  </button>
+                )}
+              </div>
             </div>
             
             {loading && <div className="text-center text-slate-500 py-8 animate-pulse">Finding best community routes...</div>}

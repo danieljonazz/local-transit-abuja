@@ -23,7 +23,8 @@ const DynamicMap = dynamic(() => import("./Map"), {
 type MapProps = {
   center?: [number, number];
   zoom?: number;
-  markers?: { id: string; position: [number, number]; title: string }[];
+  startCoords?: [number, number] | null;
+  endCoords?: [number, number] | null;
 };
 
 export default function MapViewer(props: MapProps) {
