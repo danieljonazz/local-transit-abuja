@@ -1,0 +1,51 @@
+name: Deploy Next.js to Azure VM
+
+on:
+  push:
+    branches:
+      - main # Change to 'master' if your default branch is named master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Compress source code for fast transfer
+        run: tar -czf app.tar.gz --exclude=.git .
+
+      - name: Securely copy code to Azure VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "app.tar.gz"
+          target: "~/"
+
+      - name: Build and Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Extract the code on the server
+            mkdir -p ~/transit-abuja
+            tar -xzf ~/app.tar.gz -C ~/transit-abuja
+            cd ~/transit-abuja
+
+            # Build the new Docker image
+            sudo docker build -t transit-app-image .
+
+            # Stop and remove the old running container (if it exists)
+            sudo docker stop transit-container || true
+            sudo docker rm transit-container || true
+
+            # Run the new container on Port 3000
+            sudo docker run -d -p 3000:3000 --name transit-container --restart unless-stopped transit-app-image
+            
+            # Clean up the archive to save space
+            rm ~/app.tar.gz
