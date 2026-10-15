@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, SignInButton, UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -10,11 +11,13 @@ export const metadata: Metadata = {
   description: "Community-powered local transit navigation for Abuja",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
+
   return (
     <ClerkProvider>
       <html lang="en">
@@ -23,16 +26,15 @@ export default function RootLayout({
             <h1 className="font-bold text-xl text-green-700">Transit<span className="text-slate-800">Abuja</span></h1>
             
             <div>
-              <SignedOut>
+              {!userId ? (
                 <SignInButton mode="modal">
                   <button className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors">
                     Sign In
                   </button>
                 </SignInButton>
-              </SignedOut>
-              <SignedIn>
+              ) : (
                 <UserButton />
-              </SignedIn>
+              )}
             </div>
             
           </header>
